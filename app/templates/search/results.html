@@ -1,0 +1,64 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Search{% endblock %}
+
+{% block content %}
+<div class="page-header"><h1>Search issues</h1></div>
+
+<form method="get" class="filter-bar" data-testid="search-form">
+  <div class="field" style="flex: 2; min-width: 220px">
+    <input type="search" name="q" value="{{ params.query }}" placeholder="Text or issue key, e.g. WEB-3" data-testid="search-input">
+  </div>
+  <div class="field">
+    <select name="project" data-testid="search-project">
+      <option value="">All projects</option>
+      {% for project in projects %}
+        <option value="{{ project.key }}" {% if params.project_key == project.key %}selected{% endif %}>{{ project.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <select name="status" data-testid="search-status">
+      <option value="">Any status</option>
+      {% for value, label in status_labels.items() %}
+        <option value="{{ value }}" {% if params.status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <select name="priority" data-testid="search-priority">
+      <option value="">Any priority</option>
+      {% for value in priorities %}
+        <option value="{{ value }}" {% if params.priority == value %}selected{% endif %}>{{ value|capitalize }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button type="submit" class="btn btn-primary" data-testid="search-submit">Search</button>
+</form>
+
+{% if has_filters %}
+  <p class="muted" data-testid="search-count">{{ results|length }} result{{ "" if results|length == 1 else "s" }}</p>
+  {% if results %}
+    <div class="table-wrap">
+      <table class="table" data-testid="search-results">
+        <thead><tr><th>Key</th><th>Summary</th><th>Project</th><th>Status</th><th>Assignee</th></tr></thead>
+        <tbody>
+          {% for issue in results %}
+            <tr data-testid="search-row-{{ issue.key }}">
+              <td><span class="issue-key">{{ issue.key }}</span></td>
+              <td><a href="{{ url_for('issues.issue_detail', issue_key=issue.key) }}">{{ issue.title }}</a></td>
+              <td>{{ issue.project.name }}</td>
+              <td><span class="lozenge lozenge-{{ issue.status }}">{{ issue.status_label }}</span></td>
+              <td>{{ issue.assignee.name if issue.assignee else "Unassigned" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="card empty-state" data-testid="search-empty"><h2>No matching issues</h2></div>
+  {% endif %}
+{% else %}
+  <div class="card empty-state"><p>Search by text or issue key across all your projects.</p></div>
+{% endif %}
+{% endblock %}

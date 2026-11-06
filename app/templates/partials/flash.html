@@ -1,0 +1,12 @@
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-stack" data-testid="flash-messages">
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category if category != 'message' else 'info' }}" role="alert" data-testid="flash-{{ category }}">
+          <span>{{ message }}</span>
+          <button type="button" class="flash-close" data-action="dismiss-flash" aria-label="Dismiss">&times;</button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}

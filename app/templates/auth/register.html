@@ -1,0 +1,21 @@
+{% extends "layouts/base.html" %}
+{% from "partials/form_field.html" import field %}
+
+{% block title %}Sign up{% endblock %}
+
+{% block auth_content %}
+<section class="auth-card" data-testid="register-page">
+  <h1>Create your account</h1>
+  <form method="post" class="form" novalidate data-testid="register-form">
+    {{ form.hidden_tag() }}
+    {{ field(form.name, "register-name", "Jane Doe") }}
+    {{ field(form.email, "register-email", "you@company.com") }}
+    {{ field(form.password, "register-password") }}
+    {{ field(form.confirm, "register-confirm") }}
+    <button type="submit" class="btn btn-primary btn-block" data-testid="register-submit">Sign up</button>
+  </form>
+  <p class="auth-footer">
+    Already have an account? <a href="{{ url_for('auth.login') }}" data-testid="go-to-login">Log in</a>
+  </p>
+</section>
+{% endblock %}

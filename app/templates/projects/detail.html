@@ -1,0 +1,76 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="breadcrumbs"><a href="{{ url_for('projects.list_projects') }}">Projects</a> / {{ project.name }}</div>
+<div class="page-header">
+  <div>
+    <h1 data-testid="project-title">{{ project.name }}</h1>
+    <p>{{ project.description or "No description." }}</p>
+  </div>
+  <div class="flex gap-8">
+    <a class="btn" href="{{ url_for('board.view_board', key=project.key) }}" data-testid="open-board">Open board</a>
+    <a class="btn btn-primary" href="{{ url_for('issues.create_issue', key=project.key) }}" data-testid="create-issue-button">Create issue</a>
+  </div>
+</div>
+
+<div class="stat-grid" data-testid="project-stats">
+  {% for status, label, count in status_counts %}
+    <div class="stat" data-testid="stat-{{ status }}">
+      <div class="stat-label">{{ label }}</div>
+      <div class="stat-value">{{ count }}</div>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="summary-grid">
+  <section class="card">
+    <div class="page-header" style="margin-bottom: 12px">
+      <h2>Recent issues</h2>
+      <a href="{{ url_for('issues.list_issues', key=project.key) }}">View all</a>
+    </div>
+    {% if recent_issues %}
+      <ul class="issue-list" data-testid="recent-issues">
+        {% for issue in recent_issues %}
+          <li>
+            <span class="issue-type issue-type-{{ issue.issue_type }}" title="{{ issue.issue_type }}"></span>
+            <span class="issue-key">{{ issue.key }}</span>
+            <a href="{{ url_for('issues.issue_detail', issue_key=issue.key) }}">{{ issue.title }}</a>
+            <span class="lozenge lozenge-{{ issue.status }}">{{ issue.status_label }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">No issues yet.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2>Members</h2>
+    <ul class="member-list" data-testid="member-list">
+      {% for member in project.members %}
+        <li>
+          <span class="avatar avatar-sm">{{ member.initials }}</span>
+          <span>{{ member.name }}</span>
+          {% if member.id == project.owner_id %}<span class="lozenge">Owner</span>{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    {% if can_manage %}
+      <form method="post" action="{{ url_for('projects.add_member', key=project.key) }}" class="flex gap-8 mt-16">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="field" style="flex: 1">
+          <input type="email" name="email" placeholder="teammate@company.com" required data-testid="member-email">
+        </div>
+        <button type="submit" class="btn" data-testid="add-member">Add</button>
+      </form>
+      <form method="post" action="{{ url_for('projects.archive_project', key=project.key) }}" class="mt-16"
+            data-confirm="Archive {{ project.name }}? It will disappear from your project list.">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-subtle btn-sm" data-testid="archive-project">Archive project</button>
+      </form>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

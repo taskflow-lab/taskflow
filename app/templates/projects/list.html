@@ -1,0 +1,44 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Projects{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Projects</h1>
+    <p>All projects you own or are a member of.</p>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('projects.create_project') }}" data-testid="create-project-button">Create project</a>
+</div>
+
+{% if projects %}
+  <div class="table-wrap">
+    <table class="table" data-testid="projects-table">
+      <thead>
+        <tr><th>Name</th><th>Key</th><th>Owner</th><th>Members</th></tr>
+      </thead>
+      <tbody>
+        {% for project in projects %}
+          <tr data-testid="project-row-{{ project.key }}">
+            <td>
+              <div class="flex items-center gap-8">
+                <span class="project-icon">{{ project.key[:2] }}</span>
+                <a href="{{ url_for('projects.project_detail', key=project.key) }}" data-testid="project-link-{{ project.key }}">{{ project.name }}</a>
+              </div>
+            </td>
+            <td><span class="issue-key">{{ project.key }}</span></td>
+            <td>{{ project.owner.name }}</td>
+            <td>{{ project.members|length }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="card empty-state" data-testid="projects-empty">
+    <h2>No projects yet</h2>
+    <p>Create a project to start tracking work with your team.</p>
+    <a class="btn btn-primary" href="{{ url_for('projects.create_project') }}">Create your first project</a>
+  </div>
+{% endif %}
+{% endblock %}

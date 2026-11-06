@@ -1,0 +1,91 @@
+{% extends "layouts/base.html" %}
+{% from "partials/form_field.html" import field %}
+
+{% block title %}{{ issue.key }} {{ issue.title }}{% endblock %}
+
+{% block content %}
+<div class="breadcrumbs">
+  <a href="{{ url_for('projects.list_projects') }}">Projects</a> /
+  <a href="{{ url_for('projects.project_detail', key=project.key) }}">{{ project.name }}</a> /
+  <span data-testid="issue-key">{{ issue.key }}</span>
+</div>
+
+<div class="issue-layout">
+  <div class="issue-main">
+    <h1 class="flex items-center gap-8" data-testid="issue-title">
+      <span class="issue-type issue-type-{{ issue.issue_type }}" title="{{ issue.issue_type|capitalize }}"></span>
+      {{ issue.title }}
+    </h1>
+
+    <section class="card">
+      <h3>Description</h3>
+      <p class="issue-description" data-testid="issue-description">{{ issue.description or "No description." }}</p>
+    </section>
+
+    <section class="card mt-16" id="comments">
+      <h3>Comments ({{ issue.comments|length }})</h3>
+      <ul class="comment-list" data-testid="comment-list">
+        {% for comment in issue.comments %}
+          <li class="comment" data-testid="comment">
+            <span class="avatar avatar-sm">{{ comment.author.initials }}</span>
+            <div>
+              <div><strong>{{ comment.author.name }}</strong> <span class="muted">{{ comment.created_at.strftime("%b %d, %Y %H:%M") }}</span></div>
+              <p>{{ comment.body }}</p>
+            </div>
+          </li>
+        {% else %}
+          <li class="muted">No comments yet.</li>
+        {% endfor %}
+      </ul>
+      <form method="post" action="{{ url_for('issues.add_comment', issue_key=issue.key) }}" class="form mt-16">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="field">
+          <textarea name="body" rows="3" placeholder="Add a comment…" required data-testid="comment-body"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary btn-sm" data-testid="comment-submit">Save comment</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <aside class="issue-side">
+    <section class="card">
+      <form method="post" action="{{ url_for('issues.change_status', issue_key=issue.key) }}" class="flex gap-8" data-testid="status-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="field" style="flex: 1">
+          <select name="status" data-testid="status-select">
+            {% for value, label in status_labels.items() %}
+              <option value="{{ value }}" {% if issue.status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn" data-testid="status-submit">Update</button>
+      </form>
+
+      <dl class="detail-list">
+        <dt>Status</dt><dd><span class="lozenge lozenge-{{ issue.status }}" data-testid="issue-status">{{ issue.status_label }}</span></dd>
+        <dt>Priority</dt><dd><span class="priority priority-{{ issue.priority }}">{{ issue.priority|capitalize }}</span></dd>
+        <dt>Assignee</dt><dd data-testid="issue-assignee">{{ issue.assignee.name if issue.assignee else "Unassigned" }}</dd>
+        <dt>Reporter</dt><dd>{{ issue.reporter.name }}</dd>
+        <dt>Due date</dt><dd>{{ issue.due_date.isoformat() if issue.due_date else "None" }}</dd>
+        <dt>Created</dt><dd>{{ issue.created_at.strftime("%b %d, %Y") }}</dd>
+      </dl>
+    </section>
+
+    <details class="card mt-16" data-testid="edit-issue">
+      <summary><strong>Edit details</strong></summary>
+      <form method="post" action="{{ url_for('issues.edit_issue', issue_key=issue.key) }}" class="form mt-16" novalidate>
+        {{ form.hidden_tag() }}
+        {{ field(form.title, "edit-title") }}
+        {{ field(form.issue_type, "edit-type") }}
+        {{ field(form.priority, "edit-priority") }}
+        {{ field(form.assignee_id, "edit-assignee") }}
+        {{ field(form.due_date, "edit-due-date") }}
+        {{ field(form.description, "edit-description") }}
+        <button type="submit" class="btn btn-primary btn-sm" data-testid="edit-submit">Save changes</button>
+      </form>
+    </details>
+  </aside>
+</div>
+{% endblock %}

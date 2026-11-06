@@ -1,0 +1,9 @@
+{% macro field(form_field, testid=None, placeholder=None) %}
+<div class="field {% if form_field.errors %}has-error{% endif %}">
+  {{ form_field.label }}
+  {{ form_field(placeholder=placeholder or '', **{"data-testid": testid or form_field.name}) }}
+  {% for error in form_field.errors %}
+    <span class="field-error" data-testid="{{ testid or form_field.name }}-error">{{ error }}</span>
+  {% endfor %}
+</div>
+{% endmacro %}

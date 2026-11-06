@@ -1,0 +1,41 @@
+<aside class="sidebar" data-testid="sidebar">
+  {% if project is defined and project %}
+    <div class="sidebar-project">
+      <span class="project-icon">{{ project.key[:2] }}</span>
+      <div>
+        <strong data-testid="sidebar-project-name">{{ project.name }}</strong>
+        <span class="muted">Software project</span>
+      </div>
+    </div>
+
+    <p class="sidebar-heading">Planning</p>
+    <nav class="sidebar-nav">
+      <a href="{{ url_for('projects.project_detail', key=project.key) }}"
+         class="{% if request.endpoint == 'projects.project_detail' %}active{% endif %}"
+         data-testid="sidebar-summary">Summary</a>
+      <a href="{{ url_for('board.view_board', key=project.key) }}"
+         class="{% if request.endpoint == 'board.view_board' %}active{% endif %}"
+         data-testid="sidebar-board">Board</a>
+      <a href="{{ url_for('issues.list_issues', key=project.key) }}"
+         class="{% if request.endpoint == 'issues.list_issues' %}active{% endif %}"
+         data-testid="sidebar-issues">Issues</a>
+      <a href="{{ url_for('issues.create_issue', key=project.key) }}"
+         class="{% if request.endpoint == 'issues.create_issue' %}active{% endif %}"
+         data-testid="sidebar-create-issue">Create issue</a>
+    </nav>
+  {% else %}
+    <p class="sidebar-heading">Workspace</p>
+    <nav class="sidebar-nav">
+      <a href="{{ url_for('projects.list_projects') }}"
+         class="{% if request.endpoint == 'projects.list_projects' %}active{% endif %}">All projects</a>
+      <a href="{{ url_for('search.search') }}"
+         class="{% if request.blueprint == 'search' %}active{% endif %}">Search issues</a>
+      <a href="{{ url_for('notifications.list_notifications') }}"
+         class="{% if request.blueprint == 'notifications' %}active{% endif %}">Notifications</a>
+      <a href="{{ url_for('billing.plans') }}"
+         class="{% if request.blueprint == 'billing' %}active{% endif %}">Plans</a>
+    </nav>
+  {% endif %}
+
+  <div class="sidebar-footer muted">{{ app_name }} v{{ app_version }}</div>
+</aside>

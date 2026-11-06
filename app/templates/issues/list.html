@@ -1,0 +1,71 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Issues · {{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="breadcrumbs">
+  <a href="{{ url_for('projects.list_projects') }}">Projects</a> /
+  <a href="{{ url_for('projects.project_detail', key=project.key) }}">{{ project.name }}</a> / Issues
+</div>
+<div class="page-header">
+  <h1>Issues</h1>
+  <a class="btn btn-primary" href="{{ url_for('issues.create_issue', key=project.key) }}" data-testid="create-issue-button">Create issue</a>
+</div>
+
+<form method="get" class="filter-bar" data-testid="issue-filters">
+  <div class="field">
+    <select name="status" data-testid="filter-status">
+      <option value="">All statuses</option>
+      {% for value, label in status_labels.items() %}
+        <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <select name="priority" data-testid="filter-priority">
+      <option value="">All priorities</option>
+      {% for value in priorities %}
+        <option value="{{ value }}" {% if filters.priority == value %}selected{% endif %}>{{ value|capitalize }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <select name="assignee_id" data-testid="filter-assignee">
+      <option value="">Anyone</option>
+      {% for member in project.members %}
+        <option value="{{ member.id }}" {% if filters.assignee_id == member.id %}selected{% endif %}>{{ member.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button type="submit" class="btn" data-testid="apply-filters">Filter</button>
+  <a href="{{ url_for('issues.list_issues', key=project.key) }}" class="btn btn-subtle">Clear</a>
+</form>
+
+{% if issues %}
+  <div class="table-wrap">
+    <table class="table" data-testid="issues-table">
+      <thead>
+        <tr><th>Type</th><th>Key</th><th>Summary</th><th>Status</th><th>Priority</th><th>Assignee</th><th>Due</th></tr>
+      </thead>
+      <tbody>
+        {% for issue in issues %}
+          <tr data-testid="issue-row-{{ issue.key }}">
+            <td><span class="issue-type issue-type-{{ issue.issue_type }}" title="{{ issue.issue_type|capitalize }}"></span></td>
+            <td><span class="issue-key">{{ issue.key }}</span></td>
+            <td><a href="{{ url_for('issues.issue_detail', issue_key=issue.key) }}">{{ issue.title }}</a></td>
+            <td><span class="lozenge lozenge-{{ issue.status }}">{{ issue.status_label }}</span></td>
+            <td><span class="priority priority-{{ issue.priority }}">{{ issue.priority|capitalize }}</span></td>
+            <td>{{ issue.assignee.name if issue.assignee else "Unassigned" }}</td>
+            <td>{{ issue.due_date.isoformat() if issue.due_date else "" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="card empty-state" data-testid="issues-empty">
+    <h2>No issues found</h2>
+    <p>Try clearing the filters, or create a new issue.</p>
+  </div>
+{% endif %}
+{% endblock %}

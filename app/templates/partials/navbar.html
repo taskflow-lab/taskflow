@@ -1,0 +1,51 @@
+<header class="topnav" data-testid="topnav">
+  <div class="topnav-left">
+    <button class="icon-btn sidebar-toggle" type="button" data-action="toggle-sidebar" aria-label="Toggle sidebar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <a class="logo" href="{{ url_for('index') }}" data-testid="nav-logo">
+      <span class="logo-mark" aria-hidden="true"></span>
+      <span class="logo-text">{{ app_name }}</span>
+    </a>
+    <nav class="topnav-links">
+      <a href="{{ url_for('projects.list_projects') }}"
+         class="{% if request.blueprint == 'projects' %}active{% endif %}"
+         data-testid="nav-projects">Projects</a>
+      <a href="{{ url_for('billing.plans') }}"
+         class="{% if request.blueprint == 'billing' %}active{% endif %}"
+         data-testid="nav-billing">Plans</a>
+    </nav>
+    <a class="btn btn-primary btn-sm" href="{{ url_for('projects.create_project') }}" data-testid="nav-create">+ Create</a>
+  </div>
+
+  <div class="topnav-right">
+    <form class="search-box" action="{{ url_for('search.search') }}" method="get" role="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" name="q" placeholder="Search issues" value="{{ request.args.get('q', '') }}" data-testid="nav-search-input">
+    </form>
+
+    <a class="icon-btn notif-bell" href="{{ url_for('notifications.list_notifications') }}" aria-label="Notifications" data-testid="nav-notifications">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      {% if unread_notifications %}
+        <span class="badge-count" data-testid="nav-unread-count">{{ unread_notifications }}</span>
+      {% endif %}
+    </a>
+
+    <div class="user-menu" data-dropdown>
+      <button class="avatar-btn" type="button" data-dropdown-toggle aria-haspopup="true" aria-expanded="false" data-testid="user-menu-button">
+        <span class="avatar">{{ current_user.initials }}</span>
+      </button>
+      <div class="dropdown" data-dropdown-menu hidden>
+        <div class="dropdown-header">
+          <strong>{{ current_user.name }}</strong>
+          <span>{{ current_user.email }}</span>
+        </div>
+        <a href="{{ url_for('billing.plans') }}">Plan &amp; billing</a>
+        <form action="{{ url_for('auth.logout') }}" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" data-testid="logout-button">Log out</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</header>

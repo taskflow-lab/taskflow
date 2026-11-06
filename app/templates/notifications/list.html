@@ -1,0 +1,41 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Notifications</h1>
+    <p>
+      <a href="{{ url_for('notifications.list_notifications') }}" {% if not unread_only %}class="is-active-link"{% endif %}>All</a> ·
+      <a href="{{ url_for('notifications.list_notifications', filter='unread') }}" {% if unread_only %}class="is-active-link"{% endif %} data-testid="filter-unread">Unread</a>
+    </p>
+  </div>
+  <form method="post" action="{{ url_for('notifications.mark_all_read') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="btn" data-testid="mark-all-read">Mark all as read</button>
+  </form>
+</div>
+
+{% if notifications %}
+  <ul class="card notification-list" data-testid="notification-list">
+    {% for n in notifications %}
+      <li class="notification {% if not n.is_read %}is-unread{% endif %}" data-testid="notification">
+        <form method="post" action="{{ url_for('notifications.open_notification', notification_id=n.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="notification-button">
+            <span class="notification-dot" aria-hidden="true"></span>
+            <span class="notification-message">{{ n.message }}</span>
+            <span class="muted">{{ n.created_at.strftime("%b %d, %H:%M") }}</span>
+          </button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <div class="card empty-state" data-testid="notifications-empty">
+    <h2>You're all caught up</h2>
+    <p>We'll let you know when someone assigns you work or comments on your issues.</p>
+  </div>
+{% endif %}
+{% endblock %}

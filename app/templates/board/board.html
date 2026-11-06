@@ -1,0 +1,70 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Board · {{ project.name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/board.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="breadcrumbs">
+  <a href="{{ url_for('projects.list_projects') }}">Projects</a> /
+  <a href="{{ url_for('projects.project_detail', key=project.key) }}">{{ project.name }}</a> / Board
+</div>
+<div class="page-header">
+  <h1>{{ project.key }} board</h1>
+  <a class="btn btn-primary" href="{{ url_for('issues.create_issue', key=project.key) }}" data-testid="create-issue-button">Create issue</a>
+</div>
+
+<form method="get" class="board-toolbar" data-testid="board-toolbar">
+  <div class="search-box">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input type="search" name="q" value="{{ search }}" placeholder="Filter this board" data-testid="board-search">
+  </div>
+  <div class="avatar-filter">
+    {% for member in project.members %}
+      <a href="?assignee_id={{ member.id }}{% if search %}&q={{ search|urlencode }}{% endif %}"
+         class="avatar avatar-sm {% if assignee_id == member.id %}is-selected{% endif %}"
+         title="{{ member.name }}" data-testid="board-assignee-{{ member.id }}">{{ member.initials }}</a>
+    {% endfor %}
+  </div>
+  {% if search or assignee_id %}
+    <a class="btn btn-subtle btn-sm" href="{{ url_for('board.view_board', key=project.key) }}">Clear filters</a>
+  {% endif %}
+</form>
+
+<div class="board" data-board data-testid="board">
+  {% for column in columns %}
+    <section class="board-column" data-status="{{ column.status }}" data-status-label="{{ column.label }}"
+             data-testid="column-{{ column.status }}">
+      <header class="column-header">
+        <span>{{ column.label }}</span>
+        <span class="column-count" data-column-count data-testid="column-count-{{ column.status }}">{{ column.issues|length }}</span>
+      </header>
+      <div class="column-cards" data-column-cards>
+        {% for issue in column.issues %}
+          <article class="board-card" draggable="true" data-issue-key="{{ issue.key }}"
+                   data-current-status="{{ issue.status }}" data-testid="card-{{ issue.key }}">
+            <a class="board-card-title" href="{{ url_for('issues.issue_detail', issue_key=issue.key) }}">{{ issue.title }}</a>
+            <div class="board-card-meta">
+              <div class="board-card-meta-left">
+                <span class="issue-type issue-type-{{ issue.issue_type }}" title="{{ issue.issue_type|capitalize }}"></span>
+                <span class="issue-key">{{ issue.key }}</span>
+                <span class="priority priority-{{ issue.priority }}" title="Priority">{{ issue.priority|capitalize }}</span>
+              </div>
+              {% if issue.assignee %}
+                <span class="avatar avatar-sm" title="{{ issue.assignee.name }}">{{ issue.assignee.initials }}</span>
+              {% endif %}
+            </div>
+          </article>
+        {% endfor %}
+        <div class="column-empty">Drop issues here</div>
+      </div>
+    </section>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/board.js') }}"></script>
+{% endblock %}

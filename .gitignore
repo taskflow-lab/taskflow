@@ -1,0 +1,14 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+instance/
+*.db
+.pytest_cache/
+.coverage
+htmlcov/
+test-results/
+playwright-report/
+.idea/
+.DS_Store

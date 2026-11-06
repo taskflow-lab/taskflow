@@ -1,0 +1,51 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Plans{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Plans &amp; billing</h1>
+    <p>Payments here are simulated. No real card is charged.</p>
+  </div>
+</div>
+
+<div class="stat-grid" data-testid="billing-usage">
+  <div class="stat">
+    <div class="stat-label">Current plan</div>
+    <div class="stat-value" data-testid="current-plan">{{ usage.plan|capitalize }}</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Active projects</div>
+    <div class="stat-value" data-testid="projects-used">
+      {{ usage.projects_used }}{% if usage.projects_limit %} / {{ usage.projects_limit }}{% endif %}
+    </div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Remaining</div>
+    <div class="stat-value">{{ usage.projects_remaining if usage.projects_remaining is not none else "Unlimited" }}</div>
+  </div>
+</div>
+
+<div class="card-grid plan-grid">
+  {% for plan in plans %}
+    <div class="card plan-card {% if plan.code == usage.plan %}is-current{% endif %}" data-testid="plan-{{ plan.code }}">
+      <h2>{{ plan.name }}</h2>
+      <p class="plan-price"><strong>${{ plan.price_monthly }}</strong> <span class="muted">/ user / month</span></p>
+      <p>{{ plan.max_projects ~ " active projects" if plan.max_projects else "Unlimited projects" }}</p>
+      {% if plan.code == usage.plan %}
+        <span class="lozenge lozenge-done">Current plan</span>
+      {% else %}
+        <form method="post" action="{{ url_for('billing.change_plan') }}"
+              data-confirm="Switch to the {{ plan.name }} plan?">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="plan" value="{{ plan.code }}">
+          <button type="submit" class="btn btn-primary btn-sm" data-testid="choose-{{ plan.code }}">
+            Switch to {{ plan.name }}
+          </button>
+        </form>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

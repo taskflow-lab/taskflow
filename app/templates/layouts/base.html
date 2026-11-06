@@ -1,0 +1,38 @@
+ <!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}{{ app_name }}{% endblock %} · {{ app_name }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  {% if current_user.is_authenticated %}
+    {% include "partials/navbar.html" %}
+    <div class="app-shell">
+      {% include "partials/sidebar.html" %}
+      <main class="app-main" id="main-content" data-testid="main-content">
+        {% include "partials/flash.html" %}
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  {% else %}
+    <main class="auth-shell" id="main-content" data-testid="main-content">
+      <div class="auth-brand">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span class="logo-text">{{ app_name }}</span>
+      </div>
+      {% include "partials/flash.html" %}
+      {% block auth_content %}{% endblock %}
+    </main>
+  {% endif %}
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

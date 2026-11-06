@@ -1,0 +1,32 @@
+{% extends "layouts/base.html" %}
+{% from "partials/form_field.html" import field %}
+
+{% block title %}Create issue · {{ project.name }}{% endblock %}
+
+{% block content %}
+<div class="breadcrumbs">
+  <a href="{{ url_for('projects.list_projects') }}">Projects</a> /
+  <a href="{{ url_for('projects.project_detail', key=project.key) }}">{{ project.name }}</a> / Create issue
+</div>
+<div class="page-header"><h1>Create issue</h1></div>
+
+<div class="card" style="max-width: 680px">
+  <form method="post" class="form" novalidate data-testid="issue-form">
+    {{ form.hidden_tag() }}
+    {{ field(form.title, "issue-title", "What needs to be done?") }}
+    <div class="form-row">
+      {{ field(form.issue_type, "issue-type") }}
+      {{ field(form.priority, "issue-priority") }}
+    </div>
+    <div class="form-row">
+      {{ field(form.assignee_id, "issue-assignee") }}
+      {{ field(form.due_date, "issue-due-date") }}
+    </div>
+    {{ field(form.description, "issue-description", "Add more detail") }}
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" data-testid="issue-submit">Create</button>
+      <a class="btn btn-subtle" href="{{ url_for('issues.list_issues', key=project.key) }}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
