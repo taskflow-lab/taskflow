@@ -33,11 +33,33 @@ jobs:
         run: pip install -r requirements-dev.txt
 
       - name: Run tests
-        run: python -m pytest -m "not ui" -v --junitxml=test-results/junit.xml
+        run: >
+          python -m pytest -m "not ui" -v
+          --junitxml=reports/junit.xml
+          --html=reports/report.html --self-contained-html
+          --alluredir=allure-results
 
-      - name: Upload test results
+      - name: Set up Java (needed by Allure)
+        if: always()
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Build Allure report
+        if: always()
+        run: npx --yes allure-commandline@2.46.1 generate allure-results --single-file --clean -o allure-report
+
+      - name: Upload HTML report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
-          path: test-results/
+          name: html-report
+          path: reports/
+
+      - name: Upload Allure report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report/
