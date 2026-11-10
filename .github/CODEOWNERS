@@ -1,0 +1,20 @@
+# Who must review changes to which files.
+# The LAST matching line wins, so put general rules first and specific ones after.
+# Replace YOUR_GITHUB_USERNAME with your GitHub username (keep the @).
+# In a company these would be teams, e.g. @acme/backend, @acme/sdet, @acme/devops.
+
+# Default owner for everything
+*                         @SnehaSSP
+
+# Application code (developers)
+/app/                     @SnehaSSP
+/app/modules/billing/     @SnehaSSP
+
+# Tests and test framework (SDET / QA)
+/tests/                   @SnehaSSP
+/pytest.ini               @SnehaSSP
+/requirements-dev.txt     @SnehaSSP
+/test_selection/          @SnehaSSP
+
+# CI/CD and repo settings (DevOps)
+/.github/                 @SnehaSSP
