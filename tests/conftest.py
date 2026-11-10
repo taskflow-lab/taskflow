@@ -1,6 +1,10 @@
+import copy
 from pathlib import Path
 
 import pytest
+
+
+
 
 from app import create_app
 from app.extensions import db as _db
@@ -30,6 +34,8 @@ def pytest_collection_modifyitems(config, items):
 @pytest.fixture
 def app():
     app = create_app("testing")
+    # Config dicts are shared between apps; give each test its own copy so changes don't leak.
+    app.config["PLAN_LIMITS"] = copy.deepcopy(app.config["PLAN_LIMITS"])
     with app.app_context():
         yield app
         _db.session.remove()
