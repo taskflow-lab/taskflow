@@ -1,6 +1,7 @@
 import copy
 from pathlib import Path
-
+import pytest
+from flask import g
 import pytest
 
 
@@ -36,6 +37,13 @@ def app():
     app = create_app("testing")
     # Config dicts are shared between apps; give each test its own copy so changes don't leak.
     app.config["PLAN_LIMITS"] = copy.deepcopy(app.config["PLAN_LIMITS"])
+
+    @app.before_request
+    def _fresh_login_per_request():
+        # The test keeps one app context open, so Flask shares `g` between requests.
+        # Flask-Login caches the user in `g`; clear it so each request uses its own login cookie.
+        g.pop("_login_user", None)
+
     with app.app_context():
         yield app
         _db.session.remove()
