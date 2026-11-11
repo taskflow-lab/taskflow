@@ -46,5 +46,5 @@ class Payment(db.Model):
             "currency": self.currency,
             "status": self.status,
             "mock": self.is_mock,
-            "created_at": self.created_at.isoformat(),
+            "created_at": iso_utc(self.created_at),
         }
