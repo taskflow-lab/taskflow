@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
 from app.extensions import db
+from app.utils import iso_utc
 
 STATUS_LABELS = {
     "todo": "To Do",
@@ -61,8 +62,8 @@ class Issue(db.Model):
             "assignee": {"id": self.assignee.id, "name": self.assignee.name} if self.assignee else None,
             "due_date": self.due_date.isoformat() if self.due_date else None,
             "comment_count": len(self.comments),
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat(),
+            "created_at": iso_utc(self.created_at),
+            "updated_at": iso_utc(self.updated_at),
         }
 
     def __repr__(self):
@@ -85,5 +86,5 @@ class Comment(db.Model):
             "id": self.id,
             "author": {"id": self.author.id, "name": self.author.name},
             "body": self.body,
-            "created_at": self.created_at.isoformat(),
+            "created_at": iso_utc(self.created_at),
         }

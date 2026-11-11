@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from app.extensions import db
 
-
+from app.utils import iso_utc
 def utcnow():
     return datetime.now(timezone.utc)
 
@@ -23,5 +23,5 @@ class Notification(db.Model):
             "message": self.message,
             "link": self.link,
             "is_read": self.is_read,
-            "created_at": self.created_at.isoformat(),
+            "created_at": iso_utc(self.created_at),
         }

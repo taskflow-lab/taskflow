@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
 from app.extensions import db
+from app.utils import iso_utc
 
 
 def utcnow():
@@ -38,7 +39,7 @@ class Project(db.Model):
             "owner": {"id": self.owner.id, "name": self.owner.name},
             "members": [{"id": m.id, "name": m.name, "email": m.email} for m in self.members],
             "is_archived": self.is_archived,
-            "created_at": self.created_at.isoformat(),
+            "created_at": iso_utc(self.created_at),
         }
 
     def __repr__(self):

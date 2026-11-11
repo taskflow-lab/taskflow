@@ -5,6 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.extensions import db, login_manager
 
+from app.utils import iso_utc
 ROLES = ("admin", "member", "viewer")
 
 
@@ -47,7 +48,7 @@ class User(UserMixin, db.Model):
             "email": self.email,
             "name": self.name,
             "role": self.role,
-            "created_at": self.created_at.isoformat(),
+            "created_at": iso_utc(self.created_at),
         }
 
     def __repr__(self):
