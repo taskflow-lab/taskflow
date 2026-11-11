@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from app.extensions import db
-
+from app.utils import iso_utc
 
 def utcnow():
     return datetime.now(timezone.utc)
@@ -22,7 +22,7 @@ class Subscription(db.Model):
         return {
             "plan": self.plan,
             "status": self.status,
-            "updated_at": self.updated_at.isoformat(),
+            "updated_at": iso_utc(self.updated_at),
         }
 
 
