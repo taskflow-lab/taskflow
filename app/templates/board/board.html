@@ -12,8 +12,31 @@
   <a href="{{ url_for('projects.project_detail', key=project.key) }}">{{ project.name }}</a> / Board
 </div>
 <div class="page-header">
-  <h1>{{ project.key }} board</h1>
-  <a class="btn btn-primary" href="{{ url_for('issues.create_issue', key=project.key) }}" data-testid="create-issue-button">Create issue</a>
+  <div>
+    <h1 data-testid="board-title">{{ sprint.name if sprint else project.key ~ " board" }}</h1>
+    {% if sprint %}
+      <p data-testid="sprint-banner">
+        {{ sprint.start_date.strftime("%b %d") }} – {{ sprint.end_date.strftime("%b %d") }}
+        · <strong>{{ days_left }} day{{ "" if days_left == 1 else "s" }} left</strong>
+        {% if sprint.goal %} · Goal: {{ sprint.goal }}{% endif %}
+      </p>
+    {% else %}
+      <p data-testid="no-sprint-banner">
+        No active sprint, so all issues are shown.
+        <a href="{{ url_for('sprints.view_backlog', key=project.key) }}">Plan a sprint in the backlog</a>.
+      </p>
+    {% endif %}
+  </div>
+  <div class="flex gap-8">
+    {% if sprint %}
+      <form method="post" action="{{ url_for('sprints.complete_sprint', sprint_id=sprint.id) }}"
+            data-confirm="Complete {{ sprint.name }}? Unfinished issues go back to the backlog.">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn" data-testid="board-complete-sprint">Complete sprint</button>
+      </form>
+    {% endif %}
+    <a class="btn btn-primary" href="{{ url_for('issues.create_issue', key=project.key) }}" data-testid="create-issue-button">Create issue</a>
+  </div>
 </div>
 
 <form method="get" class="board-toolbar" data-testid="board-toolbar">
