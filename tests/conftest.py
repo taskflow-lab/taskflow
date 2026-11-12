@@ -1,11 +1,8 @@
 import copy
 from pathlib import Path
+
 import pytest
 from flask import g
-import pytest
-
-
-
 
 from app import create_app
 from app.extensions import db as _db
@@ -16,7 +13,7 @@ from app.modules.projects import services as project_services
 
 TESTS_DIR = Path(__file__).parent
 TEST_TYPES = {"unit", "integration", "contract", "api", "smoke", "health", "regression", "ui"}
-MODULES = {"auth", "projects", "issues", "board", "search", "notifications", "billing", "health"}
+MODULES = {"auth", "projects", "issues", "sprints", "board", "search", "notifications", "billing", "health"}
 DEFAULT_PASSWORD = "password123"
 
 

@@ -6,7 +6,7 @@ from flask_login import current_user
 from app.config import get_config
 from app.extensions import csrf, db, login_manager
 
-MODULES = ["auth", "projects", "issues", "board", "search", "notifications", "billing", "health"]
+MODULES = ["auth", "projects", "issues", "sprints", "board", "search", "notifications", "billing", "health"]
 
 
 def create_app(config_name=None):
