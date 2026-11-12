@@ -1,0 +1,146 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Backlog · {{ project.name }}{% endblock %}
+
+{% macro issue_row(issue) %}
+  <span class="issue-type issue-type-{{ issue.issue_type }}" title="{{ issue.issue_type|capitalize }}"></span>
+  <span class="issue-key">{{ issue.key }}</span>
+  <a class="sprint-issue-title" href="{{ url_for('issues.issue_detail', issue_key=issue.key) }}">{{ issue.title }}</a>
+  <span class="lozenge lozenge-{{ issue.status }}">{{ issue.status_label }}</span>
+  <span class="priority priority-{{ issue.priority }}">{{ issue.priority|capitalize }}</span>
+  {% if issue.assignee %}
+    <span class="avatar avatar-sm" title="{{ issue.assignee.name }}">{{ issue.assignee.initials }}</span>
+  {% else %}
+    <span class="avatar avatar-sm avatar-empty" title="Unassigned">?</span>
+  {% endif %}
+{% endmacro %}
+
+{% block content %}
+<div class="breadcrumbs">
+  <a href="{{ url_for('projects.list_projects') }}">Projects</a> /
+  <a href="{{ url_for('projects.project_detail', key=project.key) }}">{{ project.name }}</a> / Backlog
+</div>
+<div class="page-header">
+  <div>
+    <h1>Backlog</h1>
+    <p>Plan sprints: create one, add issues from the backlog, then start it.</p>
+  </div>
+</div>
+
+<form method="post" action="{{ url_for('sprints.create_sprint', key=project.key) }}" class="filter-bar" data-testid="create-sprint-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="field" style="flex: 1; min-width: 180px">
+    <input type="text" name="name" maxlength="100" placeholder="{{ project.key }} Sprint {{ project.sprints.count() + 1 }}" data-testid="sprint-name">
+  </div>
+  <div class="field" style="flex: 2; min-width: 220px">
+    <input type="text" name="goal" placeholder="Sprint goal (optional)" data-testid="sprint-goal">
+  </div>
+  <button type="submit" class="btn btn-primary" data-testid="create-sprint">Create sprint</button>
+</form>
+
+{% for sprint in sprints %}
+  <section class="card sprint-card {% if sprint.status == 'active' %}is-active{% endif %}" data-testid="sprint-{{ sprint.id }}">
+    <header class="sprint-header">
+      <div>
+        <h2 class="flex items-center gap-8">
+          {{ sprint.name }}
+          <span class="lozenge lozenge-sprint-{{ sprint.status }}" data-testid="sprint-status">{{ sprint.status }}</span>
+        </h2>
+        <p class="muted">
+          {% if sprint.status == 'active' %}
+            {{ sprint.start_date.strftime("%b %d") }} – {{ sprint.end_date.strftime("%b %d") }}
+            · {{ days_left(sprint) }} day{{ "" if days_left(sprint) == 1 else "s" }} left
+          {% else %}
+            Planned
+          {% endif %}
+          · {{ sprint.issues|length }} issue{{ "" if sprint.issues|length == 1 else "s" }}
+        </p>
+        {% if sprint.goal %}<p class="sprint-goal">Goal: {{ sprint.goal }}</p>{% endif %}
+      </div>
+
+      <div class="flex items-center gap-8">
+        {% if sprint.status == 'planned' %}
+          <form method="post" action="{{ url_for('sprints.start_sprint', sprint_id=sprint.id) }}" class="flex items-center gap-8">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="field">
+              <select name="weeks" data-testid="sprint-weeks">
+                {% for w in allowed_weeks %}
+                  <option value="{{ w }}" {% if w == default_weeks %}selected{% endif %}>{{ w }} week{{ "" if w == 1 else "s" }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" data-testid="start-sprint"
+                    {% if has_active or not sprint.issues %}disabled
+                    title="{{ 'Complete the active sprint first' if has_active else 'Add issues first' }}"{% endif %}>
+              Start sprint
+            </button>
+          </form>
+        {% else %}
+          <a class="btn btn-sm" href="{{ url_for('board.view_board', key=project.key) }}">Open board</a>
+          <form method="post" action="{{ url_for('sprints.complete_sprint', sprint_id=sprint.id) }}"
+                data-confirm="Complete {{ sprint.name }}? Unfinished issues go back to the backlog.">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-primary btn-sm" data-testid="complete-sprint">Complete sprint</button>
+          </form>
+        {% endif %}
+      </div>
+    </header>
+
+    {% if sprint.issues %}
+      <ul class="sprint-issues" data-testid="sprint-issues">
+        {% for issue in sprint.issues %}
+          <li data-testid="sprint-issue-{{ issue.key }}">
+            {{ issue_row(issue) }}
+            <form method="post" action="{{ url_for('sprints.remove_from_sprint', sprint_id=sprint.id, issue_key=issue.key) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-subtle btn-sm" title="Move back to backlog" data-testid="remove-{{ issue.key }}">Remove</button>
+            </form>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted sprint-empty">No issues yet. Add some from the backlog below.</p>
+    {% endif %}
+  </section>
+{% endfor %}
+
+<section class="card sprint-card" data-testid="backlog">
+  <header class="sprint-header">
+    <div>
+      <h2>Backlog</h2>
+      <p class="muted">{{ backlog|length }} unfinished issue{{ "" if backlog|length == 1 else "s" }} not in a sprint</p>
+    </div>
+    <a class="btn btn-sm" href="{{ url_for('issues.create_issue', key=project.key) }}">Create issue</a>
+  </header>
+
+  {% if backlog %}
+    <ul class="sprint-issues" data-testid="backlog-issues">
+      {% for issue in backlog %}
+        <li data-testid="backlog-issue-{{ issue.key }}">
+          {{ issue_row(issue) }}
+          {% if sprints %}
+            <form method="post" action="{{ url_for('sprints.add_to_sprint', key=project.key) }}" class="flex items-center gap-8">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="issue_key" value="{{ issue.key }}">
+              <div class="field">
+                <select name="sprint_id" data-testid="target-sprint-{{ issue.key }}">
+                  {% for sprint in sprints %}
+                    <option value="{{ sprint.id }}">{{ sprint.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <button type="submit" class="btn btn-sm" data-testid="add-{{ issue.key }}">Add</button>
+            </form>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="muted sprint-empty">The backlog is empty.</p>
+  {% endif %}
+
+  {% if not sprints and backlog %}
+    <p class="muted">Create a sprint above to start planning.</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -299,18 +299,6 @@ h3 { font-size: 15px; font-weight: 600; }
 .mb-16 { margin-bottom: 16px; }
 .text-right { text-align: right; }
 
-/* ========== Responsive ========== */
-@media (max-width: 900px) {
-  .sidebar-toggle { display: inline-flex; }
-  .topnav-links, .search-box { display: none; }
-  .sidebar {
-    position: fixed; top: var(--topnav-height); bottom: 0; left: 0; z-index: 15;
-    transform: translateX(-100%); transition: transform 0.2s ease;
-  }
-  body.sidebar-open .sidebar { transform: translateX(0); box-shadow: var(--shadow); }
-  .app-main { padding: 16px; }
-  .form-row { grid-template-columns: 1fr; }
-}
 /* ========== Page components ========== */
 .filter-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 16px; }
 .filter-bar .field { min-width: 150px; }
@@ -352,6 +340,36 @@ details.card summary { cursor: pointer; }
 .notification.is-unread .notification-message { font-weight: 600; }
 .is-active-link { font-weight: 600; color: var(--color-text); }
 
+/* ========== Sprints ========== */
+.sprint-card { margin-bottom: 16px; }
+.sprint-card.is-active { border-color: var(--color-primary); box-shadow: 0 0 0 1px var(--color-primary); }
+.sprint-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+.sprint-header h2 { margin-bottom: 4px; }
+.sprint-header p { margin: 0; }
+.sprint-goal { margin-top: 6px !important; }
+.sprint-issues { list-style: none; margin: 0; padding: 0; border: 1px solid var(--color-border); border-radius: var(--radius); }
+.sprint-issues li { display: flex; align-items: center; gap: 10px; padding: 8px 12px; }
+.sprint-issues li + li { border-top: 1px solid var(--color-border); }
+.sprint-issues .field select { padding: 4px 8px; }
+.sprint-issue-title { flex: 1; min-width: 0; color: var(--color-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sprint-empty { padding: 12px; border: 1px dashed var(--color-border); border-radius: var(--radius); margin: 0; }
+.avatar-empty { background: var(--color-hover); color: var(--color-text-subtle); }
+.lozenge-sprint-planned { background: var(--color-hover); color: var(--color-text-subtle); }
+.lozenge-sprint-active { background: var(--color-info-soft); color: var(--color-info); }
+.lozenge-sprint-completed { background: var(--color-success-soft); color: var(--color-success); }
+
+/* ========== Responsive ========== */
 @media (max-width: 900px) {
+  .sidebar-toggle { display: inline-flex; }
+  .topnav-links, .search-box { display: none; }
+  .sidebar {
+    position: fixed; top: var(--topnav-height); bottom: 0; left: 0; z-index: 15;
+    transform: translateX(-100%); transition: transform 0.2s ease;
+  }
+  body.sidebar-open .sidebar { transform: translateX(0); box-shadow: var(--shadow); }
+  .app-main { padding: 16px; }
+  .form-row { grid-template-columns: 1fr; }
   .summary-grid, .issue-layout { grid-template-columns: 1fr; }
+  .sprint-header { flex-direction: column; }
+  .sprint-issues li { flex-wrap: wrap; }
 }
