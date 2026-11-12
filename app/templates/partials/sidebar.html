@@ -13,6 +13,9 @@
       <a href="{{ url_for('projects.project_detail', key=project.key) }}"
          class="{% if request.endpoint == 'projects.project_detail' %}active{% endif %}"
          data-testid="sidebar-summary">Summary</a>
+      <a href="{{ url_for('sprints.view_backlog', key=project.key) }}"
+         class="{% if request.endpoint == 'sprints.view_backlog' %}active{% endif %}"
+         data-testid="sidebar-backlog">Backlog</a>
       <a href="{{ url_for('board.view_board', key=project.key) }}"
          class="{% if request.endpoint == 'board.view_board' %}active{% endif %}"
          data-testid="sidebar-board">Board</a>
