@@ -8,6 +8,12 @@
   <div>
     <h1 data-testid="project-title">{{ project.name }}</h1>
     <p>{{ project.description or "No description." }}</p>
+    {% set active_sprint = project.sprints.filter_by(status="active").first() %}
+    {% if active_sprint %}
+      <p data-testid="summary-active-sprint">
+        Active sprint: <a href="{{ url_for('board.view_board', key=project.key) }}">{{ active_sprint.name }}</a>
+      </p>
+    {% endif %}
   </div>
   <div class="flex gap-8">
     <a class="btn" href="{{ url_for('board.view_board', key=project.key) }}" data-testid="open-board">Open board</a>
