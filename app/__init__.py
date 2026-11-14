@@ -9,10 +9,14 @@ from app.extensions import csrf, db, login_manager
 MODULES = ["auth", "projects", "issues", "sprints", "board", "search", "notifications", "billing", "health"]
 
 
-def create_app(config_name=None):
+def create_app(config_name=None, overrides=None):
+    """Build the app. `overrides` lets tests change settings before anything starts,
+    e.g. {"SQLALCHEMY_DATABASE_URI": "sqlite:///ui.db", "WTF_CSRF_ENABLED": True}."""
     app = Flask(__name__)
     config_class = get_config(config_name)
     app.config.from_object(config_class)
+    if overrides:
+        app.config.update(overrides)
     if hasattr(config_class, "validate"):
         config_class.validate()
 
@@ -29,7 +33,6 @@ def create_app(config_name=None):
         db.create_all()
 
     return app
-
 
 def register_extensions(app):
     db.init_app(app)
