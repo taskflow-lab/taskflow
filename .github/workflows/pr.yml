@@ -63,3 +63,49 @@ jobs:
         with:
           name: allure-report
           path: allure-report/
+
+  ui-tests:
+    name: UI tests (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Install Chromium for Playwright
+        run: python -m playwright install --with-deps chromium
+
+      - name: Run UI tests
+        run: >
+          python -m pytest -m ui -v
+          --browser chromium
+          --screenshot only-on-failure
+          --tracing retain-on-failure
+          --output test-results
+          --junitxml=reports/ui-junit.xml
+          --html=reports/ui-report.html --self-contained-html
+
+      - name: Upload UI test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-report
+          path: reports/
+
+      - name: Upload screenshots and traces of failed tests
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-failures
+          path: test-results/
